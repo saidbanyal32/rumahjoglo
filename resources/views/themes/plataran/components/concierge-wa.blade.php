@@ -19,7 +19,7 @@
     </div>
 
     <!-- Concierge Luxury Button -->
-    <a href="https://wa.me/6281234567890?text=Greetings%20Omah%20Ayem%20Concierge%2C%20I%20would%20like%20to%20inquire%20about%20a%20private%20event%20booking%20and%20sanctuary%20viewing." 
+    <a href="https://wa.me/{{ $siteSettings['formatted_whatsapp'] ?? '6281234567890' }}?text=Greetings%20Omah%20Ayem%20Concierge%2C%20I%20would%20like%20to%20inquire%20about%20a%20private%20event%20booking%20and%20sanctuary%20viewing." 
        target="_blank" 
        rel="noopener noreferrer"
        @mouseenter="open = true"

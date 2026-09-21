@@ -95,7 +95,7 @@
                        class="px-8 py-3.5 bg-luxury-forest text-luxury-ivory text-xs uppercase tracking-ultra font-medium hover:bg-luxury-forest-deep transition text-center">
                         Request Date Clearance
                     </a>
-                    <a href="https://wa.me/6281234567890?text=Greetings%20Concierge%2C%20I%20am%20inquiring%20about%20{{ urlencode($exp['title']) }}" 
+                    <a href="https://wa.me/{{ $siteSettings['formatted_whatsapp'] ?? '6281234567890' }}?text=Greetings%20Concierge%2C%20I%20am%20inquiring%20about%20{{ urlencode($exp['title']) }}" 
                        target="_blank" 
                        class="px-6 py-3.5 border border-luxury-border text-luxury-stone text-xs uppercase tracking-ultra font-medium hover:bg-luxury-cream transition text-center flex items-center justify-center gap-2">
                         <i class="fa-brands fa-whatsapp text-sm text-luxury-forest"></i>

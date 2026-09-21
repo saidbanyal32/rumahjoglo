@@ -41,9 +41,9 @@
                             <i class="fa-solid fa-map-location-dot text-brand-amber"></i>
                         </div>
                         <div>
-                            <h3 class="text-xs font-bold uppercase tracking-wider text-brand-muted">Alamat Lengkap</h3>
+                            <h3 class="text-xs font-bold uppercase tracking-wider text-brand-muted">Alamat Venue</h3>
                             <p class="text-sm font-semibold text-brand-dark mt-0.5">
-                                Jl. Taman Duta Timur, Bakti Jaya, Kec. Sukmajaya, Kota Depok, Jawa Barat 16416
+                                {{ $siteSettings['address'] ?? 'Jl. Anggajaya II No. 12, Condongcatur, Kec. Depok, Kabupaten Sleman, Daerah Istimewa Yogyakarta 55283' }}
                             </p>
                         </div>
                     </div>
@@ -54,8 +54,8 @@
                         </div>
                         <div>
                             <h3 class="text-xs font-bold uppercase tracking-wider text-brand-muted">WhatsApp Reservasi</h3>
-                            <a href="https://wa.me/6281234567890" target="_blank" class="text-sm font-bold text-emerald-700 hover:underline mt-0.5 block">
-                                +62 812-3456-7890
+                            <a href="https://wa.me/{{ $siteSettings['formatted_whatsapp'] ?? '6281234567890' }}" target="_blank" class="text-sm font-bold text-emerald-700 hover:underline mt-0.5 block">
+                                +{{ $siteSettings['contact_whatsapp'] ?? '6281234567890' }}
                             </a>
                             <p class="text-xs text-brand-muted">Respons cepat: 08.00 - 21.00 WIB</p>
                         </div>
@@ -67,8 +67,8 @@
                         </div>
                         <div>
                             <h3 class="text-xs font-bold uppercase tracking-wider text-brand-muted">Email Korespondensi</h3>
-                            <a href="mailto:info@jogloomahayem.id" class="text-sm font-semibold text-brand-dark hover:text-brand-amber mt-0.5 block">
-                                info@jogloomahayem.id
+                            <a href="mailto:{{ $siteSettings['contact_email'] ?? 'info@omahayem.com' }}" class="text-sm font-semibold text-brand-dark hover:text-brand-amber mt-0.5 block">
+                                {{ $siteSettings['contact_email'] ?? 'info@omahayem.com' }}
                             </a>
                         </div>
                     </div>
@@ -87,7 +87,7 @@
                 </div>
 
                 <div class="pt-4 border-t border-brand-sand/70">
-                    <a href="https://maps.google.com/?q=Sleman+Yogyakarta" 
+                    <a href="{{ $siteSettings['maps_embed'] ?? 'https://maps.google.com/?q=Condongcatur+Sleman' }}" 
                        target="_blank" 
                        rel="noopener noreferrer"
                        class="w-full py-3 px-4 rounded-xl bg-brand-wood hover:bg-brand-dark text-white font-semibold text-sm transition flex items-center justify-center gap-2">
@@ -104,12 +104,12 @@
                         <i class="fa-solid fa-map text-brand-amber"></i>
                         <span>Peta Interaktif Lokasi Venue</span>
                     </div>
-                    <span class="text-xs text-brand-muted">Kawasan Sejuk Ngaglik, Sleman</span>
+                    <span class="text-xs text-brand-muted">Condongcatur, Depok, Sleman</span>
                 </div>
                 
                 <div class="relative w-full flex-grow min-h-[360px] lg:min-h-[420px]">
                     <iframe 
-                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3953.535073400517!2d110.3789476!3d-7.7329599!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e7a5913e61c3383%3A0x2a11b66ab4c57700!2sJl.+Palagan+Tentara+Pelajar%2C+Kabupaten+Sleman%2C+Daerah+Istimewa+Yogyakarta!5e0!3m2!1sid!2sid!4v1620000000000!5m2!1sid!2sid" 
+                        src="{{ $siteSettings['maps_embed'] ?? 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3953.2872322304914!2d110.3955685!3d-7.7593259!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e7a599bd85f67b5%3A0xb3a827727339d936!2sCondongcatur%2C%20Depok%2C%20Sleman%20Regency%2C%20Special%20Region%20of%20Yogyakarta!5e0!3m2!1sen!2sid!4v1700000000000!5m2!1sen!2sid' }}" 
                         class="w-full h-full border-0 absolute inset-0" 
                         allowfullscreen="" 
                         loading="lazy" 

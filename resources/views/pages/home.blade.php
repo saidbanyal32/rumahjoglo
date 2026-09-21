@@ -8,7 +8,7 @@
 <section class="relative min-h-[85vh] lg:min-h-[90vh] flex items-center justify-center overflow-hidden bg-brand-dark text-white">
     <!-- Background Image with Warm Vignette Overlay -->
     <div class="absolute inset-0 z-0">
-        <img src="{{ asset('assets/joglo.jpg') }}" 
+        <img src="{{ !empty($siteSettings['hero_image']) ? $siteSettings['hero_image'] : asset('assets/joglo.jpg') }}" 
              alt="Pendopo Kayu Jati Omah Ayem" 
              class="w-full h-full object-cover object-center transform scale-105 filter brightness-75 contrast-105">
         <div class="absolute inset-0 bg-gradient-to-t from-brand-dark via-brand-dark/60 to-black/40"></div>
@@ -19,18 +19,17 @@
         <!-- Tag / Eyebrow -->
         <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-brand-sand/15 backdrop-blur-md border border-brand-gold/40 text-brand-gold text-xs sm:text-sm font-semibold tracking-widest uppercase mb-6 shadow-sm">
             <i class="fa-solid fa-gem text-xs"></i>
-            <span>Venue Klasik Bernuansa Tradisi Jawa Otentik</span>
+            <span>{{ $siteSettings['tagline'] ?? 'Venue Klasik Bernuansa Tradisi Jawa Otentik' }}</span>
         </div>
 
         <!-- Main Headline -->
         <h1 class="font-serif text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-brand-cream leading-tight sm:leading-tight mb-6">
-            Kehangatan Budaya, <br class="hidden sm:inline">
-            <span class="text-brand-gold italic font-normal">Kenyamanan Istimewa</span> untuk Momen Berharga
+            {{ $siteSettings['hero_headline'] ?? 'Pesona Otentik Joglo Kayu Jati Kuno untuk Momen Sakral dan Bersejarah' }}
         </h1>
 
         <!-- Subheadline -->
         <p class="max-w-3xl mx-auto text-base sm:text-lg lg:text-xl text-brand-cream/85 font-light leading-relaxed mb-10">
-            Rayakan pernikahan sakral, kehangatan kumpul keluarga, dan acara istimewa Anda di pendopo joglo kayu jati pilihan dengan lanskap taman asri di Depok.
+            {{ $siteSettings['hero_subheadline'] ?? 'Rayakan pernikahan sakral, kehangatan kumpul keluarga, dan acara istimewa Anda di pendopo joglo kayu jati pilihan dengan lanskap taman asri di Depok.' }}
         </p>
 
         <!-- CTA Buttons -->
@@ -350,7 +349,7 @@
                class="w-full sm:w-auto px-8 py-3.5 rounded-full bg-brand-amber text-brand-dark font-bold hover:bg-brand-gold shadow-lg transition">
                 Isi Formulir Reservasi
             </a>
-            <a href="https://wa.me/6281234567890?text=Halo%20Admin%20Joglo%20Omah%20Ayem%2C%20saya%20ingin%20jadwalkan%20survei%20lokasi" 
+            <a href="https://wa.me/{{ $siteSettings['formatted_whatsapp'] ?? '6281234567890' }}?text=Halo%20Admin%20Joglo%20Omah%20Ayem%2C%20saya%20ingin%20jadwalkan%20survei%20lokasi" 
                target="_blank" 
                class="w-full sm:w-auto px-8 py-3.5 rounded-full bg-emerald-700 hover:bg-emerald-600 text-white font-bold transition flex items-center justify-center gap-2">
                 <i class="fa-brands fa-whatsapp text-lg"></i>

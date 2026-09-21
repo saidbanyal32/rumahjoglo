@@ -293,7 +293,7 @@
                class="w-full sm:w-auto px-8 py-4 bg-luxury-brass text-luxury-stone font-semibold hover:bg-luxury-brass-light transition">
                 Submit Event Brief
             </a>
-            <a href="https://wa.me/6281234567890?text=Greetings%20Omah%20Ayem%2C%20I%20would%20like%20to%20schedule%20a%20private%20sanctuary%20walkthrough." 
+            <a href="https://wa.me/{{ $siteSettings['formatted_whatsapp'] ?? '6281234567890' }}?text=Greetings%20Omah%20Ayem%2C%20I%20would%20like%20to%20schedule%20a%20private%20sanctuary%20walkthrough." 
                target="_blank" 
                class="w-full sm:w-auto px-8 py-4 border border-luxury-ivory/30 text-luxury-ivory hover:bg-white/10 transition">
                 WhatsApp Concierge Desk

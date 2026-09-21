@@ -375,5 +375,34 @@ class PageController extends Controller
 
         return view('pages.contact', compact('faqs'));
     }
+
+    /**
+     * Simpan pengajuan reservasi baru ke database & teruskan ke WhatsApp
+     */
+    public function storeBooking(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'phone' => ['required', 'string', 'max:50'],
+            'email' => ['nullable', 'email', 'max:150'],
+            'event_date' => ['required', 'date'],
+            'package_name' => ['required', 'string', 'max:255'],
+            'guest_count' => ['nullable', 'string', 'max:100'],
+            'notes' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        $reservation = \App\Models\Reservation::create($validated);
+
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Reservasi Anda telah tercatat dalam sistem admin.',
+                'whatsapp_url' => $reservation->whats_app_url,
+            ]);
+        }
+
+        return redirect()->away($reservation->whats_app_url);
+    }
 }
+
 

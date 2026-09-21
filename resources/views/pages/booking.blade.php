@@ -46,16 +46,38 @@
                             `*Estimasi Jumlah Tamu:* ${this.guestCount || '-' } Orang%0A` +
                             `*Catatan Khusus:* ${this.notes || '-' }%0A%0A` +
                             `Mohon informasi ketersediaan jadwal dan prosedur survei lokasi. Terima kasih.`;
-                 return `https://wa.me/6281234567890?text=${text}`;
+                 return `https://wa.me/{{ $siteSettings['formatted_whatsapp'] ?? '6281234567890' }}?text=${text}`;
              },
 
-             submitDirectWA() {
-                 if (!this.name || !this.phone || !this.eventDate) {
-                     alert('Mohon lengkapi Nama, No. WhatsApp, dan Tanggal Rencana Acara terlebih dahulu.');
-                     return;
-                 }
-                 window.open(this.generateWhatsAppUrl(), '_blank');
-             },
+              submitDirectWA() {
+                  if (!this.name || !this.phone || !this.eventDate) {
+                      alert('Mohon lengkapi Nama, No. WhatsApp, dan Tanggal Rencana Acara terlebih dahulu.');
+                      return;
+                  }
+
+                  // Catat ke database admin (asynchronous)
+                  fetch('{{ route('booking.store') }}', {
+                      method: 'POST',
+                      headers: {
+                          'Content-Type': 'application/json',
+                          'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                          'Accept': 'application/json'
+                      },
+                      body: JSON.stringify({
+                          name: this.name,
+                          phone: this.phone,
+                          email: this.email,
+                          event_date: this.eventDate,
+                          package_name: this.selectedPkg || 'Paket Kustom / Konsultasi Khusus',
+                          guest_count: this.guestCount,
+                          notes: this.notes
+                      })
+                  }).catch(function(err) {
+                      console.log('Catatan booking offline/disimpan lokal:', err);
+                  });
+
+                  window.open(this.generateWhatsAppUrl(), '_blank');
+              },
 
              submitPreview() {
                  if (!this.name || !this.phone || !this.eventDate) {

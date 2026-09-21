@@ -18,7 +18,11 @@
     </div>
 
     <!-- WhatsApp Main Button -->
-    <a href="https://wa.me/6281234567890?text=Halo%20Admin%20Rumah%20Joglo%20Omah%20Ayem%2C%20saya%20tertarik%20untuk%20menanyakan%20ketersediaan%20jadwal%20sewa%20tempat..." 
+    @php
+        $waNum = $siteSettings['formatted_whatsapp'] ?? \App\Models\Setting::getWhatsAppNumber('6281234567890');
+        $waText = rawurlencode('Halo Admin Rumah Joglo Omah Ayem, saya tertarik untuk menanyakan ketersediaan jadwal sewa tempat...');
+    @endphp
+    <a href="https://wa.me/{{ $waNum }}?text={{ $waText }}" 
        target="_blank" 
        rel="noopener noreferrer"
        @mouseenter="tooltip = true"

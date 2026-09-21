@@ -16,19 +16,19 @@
                     Persewaan pendopo joglo otentik kayu jati Jawa klasik. Menghadirkan kehangatan tradisi, kenyamanan modern, serta ketenangan alam untuk setiap perayaan sakral dan kebersamaan keluarga Anda.
                 </p>
                 <div class="flex items-center gap-3 pt-2">
-                    <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" 
+                    <a href="{{ $siteSettings['social_instagram'] ?? 'https://instagram.com' }}" target="_blank" rel="noopener noreferrer" 
                        class="w-9 h-9 rounded-full bg-brand-wood text-white hover:bg-brand-amber hover:text-brand-dark flex items-center justify-center transition" title="Instagram">
                         <i class="fa-brands fa-instagram"></i>
                     </a>
-                    <a href="https://tiktok.com" target="_blank" rel="noopener noreferrer" 
+                    <a href="{{ $siteSettings['social_tiktok'] ?? 'https://tiktok.com' }}" target="_blank" rel="noopener noreferrer" 
                        class="w-9 h-9 rounded-full bg-brand-wood text-white hover:bg-brand-amber hover:text-brand-dark flex items-center justify-center transition" title="TikTok">
                         <i class="fa-brands fa-tiktok"></i>
                     </a>
-                    <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" 
+                    <a href="{{ $siteSettings['social_youtube'] ?? 'https://youtube.com' }}" target="_blank" rel="noopener noreferrer" 
                        class="w-9 h-9 rounded-full bg-brand-wood text-white hover:bg-brand-amber hover:text-brand-dark flex items-center justify-center transition" title="YouTube">
                         <i class="fa-brands fa-youtube"></i>
                     </a>
-                    <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" 
+                    <a href="{{ $siteSettings['social_facebook'] ?? 'https://facebook.com' }}" target="_blank" rel="noopener noreferrer" 
                        class="w-9 h-9 rounded-full bg-brand-wood text-white hover:bg-brand-amber hover:text-brand-dark flex items-center justify-center transition" title="Facebook">
                         <i class="fa-brands fa-facebook-f"></i>
                     </a>
@@ -104,11 +104,13 @@
                 <ul class="space-y-3 text-sm text-brand-cream/80">
                     <li class="flex items-start gap-3">
                         <i class="fa-solid fa-location-dot text-brand-amber mt-1 shrink-0"></i>
-                        <span>Jl. Taman Duta Timur, Bakti Jaya, Kec. Sukmajaya, Kota Depok, Jawa Barat 16416</span>
+                        <span>{{ $siteSettings['address'] ?? 'Jl. Anggajaya II No. 12, Condongcatur, Kec. Depok, Kabupaten Sleman, Daerah Istimewa Yogyakarta 55283' }}</span>
                     </li>
                     <li class="flex items-center gap-3">
                         <i class="fa-brands fa-whatsapp text-brand-amber shrink-0 text-base"></i>
-                        <span>+62 851-4377-3112 (CS Reservasi)</span>
+                        <a href="https://wa.me/{{ $siteSettings['formatted_whatsapp'] ?? '6281234567890' }}" target="_blank" class="hover:text-brand-gold transition">
+                            +{{ $siteSettings['contact_whatsapp'] ?? '6281234567890' }} (CS Reservasi)
+                        </a>
                     </li>
                     <li class="flex items-center gap-3">
                         <i class="fa-solid fa-clock text-brand-amber shrink-0 text-sm"></i>

@@ -45,8 +45,8 @@
                             `*Desired Offering:* ${this.chosenExperience || '-' }%0A` +
                             `*Estimated Attendance:* ${this.estimatedGuests || '-' }%0A` +
                             `*Special Curatorial Brief:* ${this.visionNotes || '-' }%0A%0A` +
-                            `Kindly advise on calendar availability and private walkthrough arrangements. Warm regards.`;
-                 return `https://wa.me/6281234567890?text=${text}`;
+                             `Kindly advise on calendar availability and private walkthrough arrangements. Warm regards.`;
+                 return `https://wa.me/{{ $siteSettings['formatted_whatsapp'] ?? '6281234567890' }}?text=${text}`;
              },
 
              submitInquiry() {

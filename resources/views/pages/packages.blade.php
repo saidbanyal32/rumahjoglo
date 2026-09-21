@@ -89,7 +89,7 @@
                            class="flex-1 py-3.5 px-6 rounded-xl font-bold text-sm text-center transition shadow-md {{ $pkg['featured'] ? 'bg-brand-wood hover:bg-brand-dark text-white' : 'bg-brand-sand/80 hover:bg-brand-wood hover:text-white text-brand-wood' }}">
                             Pilih & Cek Jadwal Paket Ini
                         </a>
-                        <a href="https://wa.me/6281234567890?text=Halo%20Admin%2C%20saya%20tertarik%20dengan%20{{ urlencode($pkg['name']) }}" 
+                        <a href="https://wa.me/{{ $siteSettings['formatted_whatsapp'] ?? '6281234567890' }}?text=Halo%20Admin%2C%20saya%20tertarik%20dengan%20{{ urlencode($pkg['name']) }}" 
                            target="_blank" 
                            class="px-4 py-3.5 rounded-xl border border-emerald-600 text-emerald-700 hover:bg-emerald-50 text-center transition flex items-center justify-center text-lg"
                            title="Tanya CS via WhatsApp">

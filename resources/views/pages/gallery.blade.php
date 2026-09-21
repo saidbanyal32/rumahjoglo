@@ -101,7 +101,7 @@
             <p class="text-brand-muted text-sm mb-6">
                 Kami dengan senang hati menemani Anda untuk sesi survei lokasi dan konsultasi tata letak acara Anda.
             </p>
-            <a href="https://wa.me/6281234567890?text=Halo%20Admin%2C%20saya%20ingin%20jadwal%20survei%20lokasi%20Joglo%20Omah%20Ayem" 
+            <a href="https://wa.me/{{ $siteSettings['formatted_whatsapp'] ?? '6281234567890' }}?text=Halo%20Admin%2C%20saya%20ingin%20jadwal%20survei%20lokasi%20Joglo%20Omah%20Ayem" 
                target="_blank" 
                class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm transition shadow-md">
                 <i class="fa-brands fa-whatsapp text-lg"></i>
