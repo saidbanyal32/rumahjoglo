@@ -27,9 +27,19 @@ class SettingSeeder extends Seeder
             ['key' => 'social_facebook', 'value' => 'https://facebook.com/omahayem.joglo', 'group' => 'social'],
             ['key' => 'social_youtube', 'value' => 'https://youtube.com/@omahayem', 'group' => 'social'],
 
+            // Pengaturan Rekening Bank & Pembayaran DP
+            ['key' => 'dp_percentage', 'value' => '30', 'group' => 'payment'],
+            ['key' => 'bank_name_1', 'value' => 'BCA', 'group' => 'payment'],
+            ['key' => 'bank_account_number_1', 'value' => '8465-123-456', 'group' => 'payment'],
+            ['key' => 'bank_account_holder_1', 'value' => 'Rumah Joglo Omah Ayem', 'group' => 'payment'],
+            ['key' => 'bank_name_2', 'value' => 'Bank Mandiri', 'group' => 'payment'],
+            ['key' => 'bank_account_number_2', 'value' => '137-00-1234567-8', 'group' => 'payment'],
+            ['key' => 'bank_account_holder_2', 'value' => 'Rumah Joglo Omah Ayem', 'group' => 'payment'],
+            ['key' => 'payment_instructions', 'value' => 'Silakan lakukan transfer Uang Muka (DP) ke rekening resmi kami di atas dan sertakan Kode Booking pada berita transfer. Jadwal acara resmi terkunci setelah pembayaran DP diverifikasi.', 'group' => 'payment'],
+
             // Hero & Beranda
             ['key' => 'hero_headline', 'value' => 'Pesona Otentik Joglo Kayu Jati Kuno untuk Momen Sakral dan Bersejarah', 'group' => 'hero'],
-            ['key' => 'hero_subheadline', 'value' => 'Tempat sewa eksklusif bernuansa klasik Jawa di Depok, Jawa barat. Suasana asri nan damai untuk pernikahan adat, gathering keluarga, dan photoshoot privat.', 'group' => 'hero'],
+            ['key' => 'hero_subheadline', 'value' => 'Tempat sewa eksklusif bernuansa klasik Jawa di Condongcatur, Yogyakarta. Suasana asri nan damai untuk pernikahan adat, gathering keluarga, dan photoshoot privat.', 'group' => 'hero'],
             ['key' => 'hero_image', 'value' => 'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=1920&q=80', 'group' => 'hero'],
         ];
 

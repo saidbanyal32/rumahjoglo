@@ -2,7 +2,7 @@
 
 @section('title', 'Pengaturan Website')
 @section('page_title', 'Konfigurasi Website & Identitas Properti')
-@section('page_subtitle', 'Sesuaikan nama properti, nomor WhatsApp resmi, alamat maps, sosial media, dan hero banner beranda')
+@section('page_subtitle', 'Sesuaikan nama properti, nomor WhatsApp resmi, rekening bank tujuan, persentase DP, dan hero banner beranda')
 
 @section('content')
 <div class="max-w-5xl space-y-8" x-data="{ activeTab: 'profile' }">
@@ -15,6 +15,14 @@
                 class="px-5 py-2.5 rounded-xl font-bold text-xs transition flex items-center gap-2">
             <i class="fa-solid fa-hotel"></i>
             <span>Profil Properti & Kontak</span>
+        </button>
+
+        <button type="button" 
+                @click="activeTab = 'payment'" 
+                :class="activeTab === 'payment' ? 'bg-amber-600 text-white shadow-sm' : 'text-stone-600 hover:bg-stone-100'"
+                class="px-5 py-2.5 rounded-xl font-bold text-xs transition flex items-center gap-2">
+            <i class="fa-solid fa-credit-card"></i>
+            <span>Rekening Bank & DP</span>
         </button>
 
         <button type="button" 
@@ -81,7 +89,7 @@
                            required 
                            placeholder="Contoh: 6281234567890"
                            class="w-full px-4 py-3 rounded-xl border border-stone-300 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 font-mono">
-                    <p class="text-[11px] text-stone-600 mt-1">Gunakan awalan 62 tanpa spasi atau tanda hubung untuk kompatibilitas wa.me.</p>
+                    <p class="text-[11px] text-stone-600 mt-1">Gunakan format internasional (misal 6281234567890) agar tombol WhatsApp langsung berfungsi.</p>
                 </div>
 
                 <!-- Email Pengelola -->
@@ -122,7 +130,125 @@
             </div>
         </div>
 
-        <!-- 2. TAB: MEDIA SOSIAL -->
+        <!-- 2. TAB: REKENING BANK & DP -->
+        <div x-show="activeTab === 'payment'" x-cloak class="bg-white rounded-3xl border border-stone-200/80 p-6 sm:p-8 shadow-sm space-y-6">
+            <div class="border-b border-stone-100 pb-4">
+                <h3 class="font-serif text-lg font-bold text-stone-900">Rekening Tujuan Transfer & Skema Uang Muka (DP)</h3>
+                <p class="text-xs text-stone-600">Nomor rekening ini ditampilkan pada halaman invoice instruksi pembayaran bagi calon penyewa.</p>
+            </div>
+
+            <!-- Persentase DP -->
+            <div class="text-xs max-w-xs">
+                <label class="block font-bold uppercase tracking-wider text-stone-700 mb-2">
+                    Persentase Uang Muka (DP %) <span class="text-rose-600">*</span>
+                </label>
+                <div class="relative">
+                    <input type="number" 
+                           name="dp_percentage" 
+                           min="10" 
+                           max="100"
+                           value="{{ old('dp_percentage', $settings['dp_percentage'] ?? '30') }}" 
+                           required 
+                           class="w-full px-4 py-3 rounded-xl border border-stone-300 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 font-bold">
+                    <span class="absolute right-4 top-3 text-stone-500 font-bold">%</span>
+                </div>
+                <p class="text-[11px] text-stone-600 mt-1">Default 30% atau 50% dari total nilai paket.</p>
+            </div>
+
+            <!-- Rekening 1: BCA -->
+            <div class="p-5 rounded-2xl bg-stone-50 border border-stone-200 space-y-4 text-xs">
+                <span class="font-bold text-brand-dark uppercase tracking-wider text-[11px] block">Rekening Bank Utama (1)</span>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block font-semibold text-stone-600 mb-1">Nama Bank</label>
+                        <input type="text" 
+                               name="bank_name_1" 
+                               value="{{ old('bank_name_1', $settings['bank_name_1'] ?? 'BCA') }}" 
+                               class="w-full px-3 py-2 rounded-xl border border-stone-300 font-bold">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-stone-600 mb-1">Nomor Rekening</label>
+                        <input type="text" 
+                               name="bank_account_number_1" 
+                               value="{{ old('bank_account_number_1', $settings['bank_account_number_1'] ?? '8465-123-456') }}" 
+                               class="w-full px-3 py-2 rounded-xl border border-stone-300 font-mono font-bold">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-stone-600 mb-1">Atas Nama (Rekening)</label>
+                        <input type="text" 
+                               name="bank_account_holder_1" 
+                               value="{{ old('bank_account_holder_1', $settings['bank_account_holder_1'] ?? 'Rumah Joglo Omah Ayem') }}" 
+                               class="w-full px-3 py-2 rounded-xl border border-stone-300 font-medium">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rekening 2: Mandiri / Lainnya -->
+            <div class="p-5 rounded-2xl bg-stone-50 border border-stone-200 space-y-4 text-xs">
+                <span class="font-bold text-brand-dark uppercase tracking-wider text-[11px] block">Rekening Bank Alternatif (2)</span>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block font-semibold text-stone-600 mb-1">Nama Bank</label>
+                        <input type="text" 
+                               name="bank_name_2" 
+                               value="{{ old('bank_name_2', $settings['bank_name_2'] ?? 'Bank Mandiri') }}" 
+                               class="w-full px-3 py-2 rounded-xl border border-stone-300 font-bold">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-stone-600 mb-1">Nomor Rekening</label>
+                        <input type="text" 
+                               name="bank_account_number_2" 
+                               value="{{ old('bank_account_number_2', $settings['bank_account_number_2'] ?? '137-00-1234567-8') }}" 
+                               class="w-full px-3 py-2 rounded-xl border border-stone-300 font-mono font-bold">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-stone-600 mb-1">Atas Nama (Rekening)</label>
+                        <input type="text" 
+                               name="bank_account_holder_2" 
+                               value="{{ old('bank_account_holder_2', $settings['bank_account_holder_2'] ?? 'Rumah Joglo Omah Ayem') }}" 
+                               class="w-full px-3 py-2 rounded-xl border border-stone-300 font-medium">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Petunjuk Transfer -->
+            <div class="text-xs">
+                <label class="block font-bold uppercase tracking-wider text-stone-700 mb-2">
+                    Teks Petunjuk Pembayaran / Instruksi
+                </label>
+                <textarea name="payment_instructions" 
+                          rows="3" 
+                          class="w-full px-4 py-3 rounded-xl border border-stone-300 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500">{{ old('payment_instructions', $settings['payment_instructions'] ?? 'Silakan lakukan transfer Uang Muka (DP) ke rekening resmi kami di atas dan sertakan Kode Booking pada berita transfer. Jadwal acara resmi terkunci setelah pembayaran DP diverifikasi.') }}</textarea>
+            </div>
+
+            <!-- WhatsApp API Gateway Config (Opsional) -->
+            <div class="pt-4 border-t border-stone-200">
+                <span class="font-bold text-stone-900 block text-sm mb-1">Integrasi WhatsApp Gateway (Opsional)</span>
+                <p class="text-xs text-stone-500 mb-4">Jika Anda menggunakan provider API seperti Fonnte atau Wablas, masukkan token di sini untuk pengiriman pesan otomatis.</p>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                    <div>
+                        <label class="block font-semibold text-stone-600 mb-1">Provider WhatsApp Gateway</label>
+                        <select name="whatsapp_provider" class="w-full px-3 py-2.5 rounded-xl border border-stone-300 bg-white">
+                            <option value="fonnte" {{ ($settings['whatsapp_provider'] ?? 'fonnte') === 'fonnte' ? 'selected' : '' }}>Fonnte (api.fonnte.com)</option>
+                            <option value="wablas" {{ ($settings['whatsapp_provider'] ?? '') === 'wablas' ? 'selected' : '' }}>Wablas (wablas.com)</option>
+                            <option value="custom" {{ ($settings['whatsapp_provider'] ?? '') === 'custom' ? 'selected' : '' }}>Generic / Custom Webhook</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block font-semibold text-stone-600 mb-1">API Token / Secret Key</label>
+                        <input type="password" 
+                               name="whatsapp_api_token" 
+                               value="{{ old('whatsapp_api_token', $settings['whatsapp_api_token'] ?? '') }}" 
+                               placeholder="Masukkan token API jika ada" 
+                               class="w-full px-3 py-2.5 rounded-xl border border-stone-300 font-mono">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. TAB: MEDIA SOSIAL -->
         <div x-show="activeTab === 'social'" x-cloak class="bg-white rounded-3xl border border-stone-200/80 p-6 sm:p-8 shadow-sm space-y-6">
             <div class="border-b border-stone-100 pb-4">
                 <h3 class="font-serif text-lg font-bold text-stone-900">Tautan Media Sosial Resmi</h3>
@@ -180,7 +306,7 @@
             </div>
         </div>
 
-        <!-- 3. TAB: HERO BANNER & BERANDA -->
+        <!-- 4. TAB: HERO BANNER & BERANDA -->
         <div x-show="activeTab === 'hero'" x-cloak class="bg-white rounded-3xl border border-stone-200/80 p-6 sm:p-8 shadow-sm space-y-6">
             <div class="border-b border-stone-100 pb-4">
                 <h3 class="font-serif text-lg font-bold text-stone-900">Hero Banner & Teks Utama Beranda</h3>
@@ -226,7 +352,7 @@
                 </label>
                 <textarea name="hero_subheadline" 
                           rows="3" 
-                          placeholder="Tempat sewa eksklusif bernuansa klasik Jawa di Depok, Jawa Barat..."
+                          placeholder="Tempat sewa eksklusif bernuansa klasik Jawa di Condongcatur, Yogyakarta..."
                           class="w-full px-4 py-3 rounded-xl border border-stone-300 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500">{{ old('hero_subheadline', $settings['hero_subheadline'] ?? '') }}</textarea>
             </div>
         </div>
@@ -246,4 +372,3 @@
 
 </div>
 @endsection
-

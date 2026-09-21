@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Reservation;
+use App\Services\WhatsAppService;
 use Illuminate\Http\Request;
 
 class ReservationController extends Controller
@@ -18,8 +19,12 @@ class ReservationController extends Controller
 
         $query = Reservation::query()->latest();
 
-        if ($status !== 'all' && in_array($status, ['pending', 'confirmed', 'completed', 'cancelled'])) {
-            $query->where('status', $status);
+        if ($status !== 'all') {
+            if ($status === 'pending') {
+                $query->whereIn('status', ['pending', 'pending_payment']);
+            } elseif (in_array($status, ['confirmed', 'completed', 'cancelled', 'pending_payment'])) {
+                $query->where('status', $status);
+            }
         }
 
         if ($search) {
@@ -27,6 +32,7 @@ class ReservationController extends Controller
                 $q->where('name', 'like', "%{$search}%")
                   ->orWhere('phone', 'like', "%{$search}%")
                   ->orWhere('package_name', 'like', "%{$search}%")
+                  ->orWhere('booking_code', 'like', "%{$search}%")
                   ->orWhere('email', 'like', "%{$search}%");
             });
         }
@@ -36,7 +42,7 @@ class ReservationController extends Controller
         // Hitung badge counter per status
         $counts = [
             'all' => Reservation::count(),
-            'pending' => Reservation::where('status', 'pending')->count(),
+            'pending' => Reservation::whereIn('status', ['pending', 'pending_payment'])->count(),
             'confirmed' => Reservation::where('status', 'confirmed')->count(),
             'completed' => Reservation::where('status', 'completed')->count(),
             'cancelled' => Reservation::where('status', 'cancelled')->count(),
@@ -51,13 +57,37 @@ class ReservationController extends Controller
     public function updateStatus(Request $request, Reservation $reservation)
     {
         $validated = $request->validate([
-            'status' => ['required', 'in:pending,confirmed,completed,cancelled'],
+            'status' => ['required', 'in:pending,pending_payment,confirmed,completed,cancelled'],
             'admin_notes' => ['nullable', 'string', 'max:1000'],
         ]);
 
+        $oldStatus = $reservation->status;
         $reservation->update($validated);
 
+        // Jika diubah menjadi confirmed, update payment_status dan kirim notifikasi WA (Trigger 2)
+        if ($validated['status'] === 'confirmed' && $oldStatus !== 'confirmed') {
+            $reservation->update(['payment_status' => 'paid']);
+            WhatsAppService::sendPaymentConfirmedNotice($reservation);
+        }
+
         return redirect()->back()->with('success', "Status reservasi {$reservation->name} berhasil diperbarui menjadi {$reservation->status_label}.");
+    }
+
+    /**
+     * Konfirmasi Pembayaran Uang Muka (DP) & Kirim Resi Resmi via WhatsApp
+     */
+    public function confirmPayment(Request $request, Reservation $reservation)
+    {
+        $reservation->update([
+            'status' => 'confirmed',
+            'payment_status' => 'paid',
+            'admin_notes' => ($reservation->admin_notes ? $reservation->admin_notes . "\n" : '') . 'Pembayaran DP telah diverifikasi oleh admin pada ' . now()->translatedFormat('d M Y H:i') . ' WIB.'
+        ]);
+
+        // Trigger WhatsApp 2
+        WhatsAppService::sendPaymentConfirmedNotice($reservation);
+
+        return redirect()->back()->with('success', "Pembayaran DP untuk {$reservation->name} berhasil dikonfirmasi dan jadwal acara telah resmi terkunci!");
     }
 
     /**
@@ -71,4 +101,3 @@ class ReservationController extends Controller
         return redirect()->back()->with('success', "Data reservasi dari {$name} berhasil dihapus.");
     }
 }
-

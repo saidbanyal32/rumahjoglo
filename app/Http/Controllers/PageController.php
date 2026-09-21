@@ -52,96 +52,11 @@ class PageController extends Controller
     }
 
     /**
-     * Data Dummy Paket Sewa
+     * Data Paket Sewa
      */
     private function getPackages()
     {
-        return [
-            [
-                'id' => 'photoshoot',
-                'name' => 'Paket Photoshoot & Video',
-                'slug' => 'photoshoot-commercial',
-                'subtitle' => 'Untuk Prewedding, Buku Tahunan, Katalog Produk & Syuting Komersial',
-                'price' => 'Rp 2.500.000',
-                'duration' => 'Maksimal 6 Jam Penggunaan',
-                'featured' => false,
-                'tag' => 'Favorit Prewedding',
-                'inclusions' => [
-                    'Akses seluruh area Joglo & Taman Terbuka',
-                    '1 Ruang Ganti / Rias ber-AC',
-                    'Daya listrik standar untuk lighting foto/video',
-                    'Akses properti dekorasi joglo antik',
-                    'Free air mineral galon & dispenser',
-                    'Kapasitas kru s.d 15 orang'
-                ],
-                'note' => 'Cocok untuk sesi foto pagi (golden hour) atau sore hari.'
-            ],
-            [
-                'id' => 'intimate-event',
-                'name' => 'Paket Half-Day Intimate Event',
-                'slug' => 'half-day-event',
-                'subtitle' => 'Pilihan tepat untuk Lamaran, Akad Nikah, Siraman, Arisan, atau Ulang Tahun',
-                'price' => 'Rp 8.500.000',
-                'duration' => '6 Jam Pemakaian (Pagi / Sore)',
-                'featured' => false,
-                'tag' => 'Paling Populer',
-                'inclusions' => [
-                    'Kapasitas s.d 150 tamu undangan',
-                    'Pendopo utama & teras samping',
-                    '1 Ruang VIP / Kamar Rias ber-AC',
-                    'Sound system standar (2 mic wireless + speaker)',
-                    'Kursi futura 50 unit + cover krem',
-                    'Area katering & dapur preparation',
-                    'Daya listrik 5.000 VA',
-                    'Petugas kebersihan & keamanan stand-by'
-                ],
-                'note' => 'Bebas biaya vendor luar (no corkage fee untuk rekanan standar).'
-            ],
-            [
-                'id' => 'wedding-fullday',
-                'name' => 'Paket Grand Pendopo Wedding',
-                'slug' => 'grand-wedding-fullday',
-                'subtitle' => 'Penyelenggaraan Resepsi Pernikahan Megah & Sakral bernuansa Tradisional Jawa',
-                'price' => 'Rp 18.500.000',
-                'duration' => '12 Jam Pemakaian Fleksibel',
-                'featured' => true,
-                'tag' => 'Paling Diminati',
-                'inclusions' => [
-                    'Kapasitas leluasa s.d 400 tamu',
-                    'Eksklusif seluruh area (Pendopo, Taman, Gazebo, Selasar)',
-                    '2 Kamar Penginapan/Rias ber-AC (Bisa untuk transit keluarga)',
-                    'Daya listrik 10.000 VA + Genset standby cadangan',
-                    'Kursi futura 100 unit + cover elegan',
-                    'Meja prasmanan & gubukan kayu jati otentik',
-                    'Tim kebersihan selama acara & pasca acara',
-                    'Ruang transit keluarga inti & toilet khusus pengantin',
-                    'Area parkir terkelola dengan petugas parkir berpengalaman',
-                    'Izin keramaian & koordinasi lingkungan'
-                ],
-                'note' => 'Bonus menginap 1 malam di Rumah Glamping Kayu untuk pengantin.'
-            ],
-            [
-                'id' => 'homestay-gathering',
-                'name' => 'Paket Inap & Family Gathering',
-                'slug' => 'homestay-gathering',
-                'subtitle' => 'Liburan keluarga besar, arisan trah, atau retreat komunitas dalam ketenangan pedesaan',
-                'price' => 'Rp 4.750.000',
-                'duration' => '24 Jam (Check-in 14.00, Check-out 12.00)',
-                'featured' => false,
-                'tag' => 'Keluarga & Komunitas',
-                'inclusions' => [
-                    'Akomodasi inap kapasitas 15–20 orang',
-                    '3 Kamar tidur ber-AC dengan ranjang kayu jati',
-                    'Pendopo luas untuk kumpul santai & karaoke',
-                    'Dapur lengkap dengan alat masak, kompor, dan kulkas',
-                    'Alat bakar BBQ di halaman taman',
-                    'Smart TV, High-speed Wi-Fi 50 Mbps, Sound karaoke',
-                    'Sarapan tradisional khas ndeso untuk 15 porsi',
-                    'Parkir muat 10+ mobil keluarga'
-                ],
-                'note' => 'Suasana hening dan sejuk, jauh dari kebisingan jalan protokol.'
-            ],
-        ];
+        return config('packages.items', []);
     }
 
     /**
@@ -339,14 +254,29 @@ class PageController extends Controller
     }
 
     /**
-     * Halaman Reservasi / Inquiry
+     * Halaman Reservasi / Inquiry dengan kalkulasi DP & Rekening Transfer
      */
     public function booking(Request $request)
     {
         $packages = $this->getPackages();
         $selectedPackage = $request->query('paket', '');
+        $dpPercentage = (int) \App\Models\Setting::get('dp_percentage', 30);
 
-        return view('pages.booking', compact('packages', 'selectedPackage'));
+        return view('pages.booking', compact('packages', 'selectedPackage', 'dpPercentage'));
+    }
+
+    /**
+     * Endpoint API: Cek ketersediaan tanggal acara (Pencegahan Double Booking)
+     */
+    public function checkDate(Request $request)
+    {
+        $date = $request->query('date');
+        if (!$date) {
+            return response()->json(['available' => false, 'message' => 'Tanggal belum dipilih.'], 400);
+        }
+
+        $result = \App\Services\BookingService::checkDate($date);
+        return response()->json($result);
     }
 
     /**
@@ -377,7 +307,7 @@ class PageController extends Controller
     }
 
     /**
-     * Simpan pengajuan reservasi baru ke database & teruskan ke WhatsApp
+     * Simpan pengajuan reservasi baru ke database, hitung DP, kirim WA otomatis, & arahkan ke instruksi transfer
      */
     public function storeBooking(Request $request)
     {
@@ -385,23 +315,131 @@ class PageController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'phone' => ['required', 'string', 'max:50'],
             'email' => ['nullable', 'email', 'max:150'],
-            'event_date' => ['required', 'date'],
+            'event_date' => ['required', 'date', 'after_or_equal:today'],
             'package_name' => ['required', 'string', 'max:255'],
             'guest_count' => ['nullable', 'string', 'max:100'],
             'notes' => ['nullable', 'string', 'max:1000'],
+        ], [
+            'name.required' => 'Nama lengkap wajib diisi.',
+            'phone.required' => 'Nomor WhatsApp wajib diisi.',
+            'event_date.required' => 'Tanggal rencana acara wajib dipilih.',
+            'event_date.after_or_equal' => 'Tanggal acara tidak boleh di masa lampau.',
+            'package_name.required' => 'Pilihan paket sewa wajib dipilih.',
         ]);
 
-        $reservation = \App\Models\Reservation::create($validated);
+        // 1. Validasi Double Booking: Pastikan tanggal belum dikunci pihak lain
+        if (\App\Models\Reservation::isDateBooked($validated['event_date'])) {
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Maaf, tanggal yang Anda pilih telah dipesan dan terkunci untuk acara lain. Silakan pilih tanggal alternatif.',
+                ], 422);
+            }
+
+            return back()->withErrors([
+                'event_date' => 'Maaf, tanggal tersebut telah dipesan untuk acara lain. Silakan pilih tanggal alternatif.'
+            ])->withInput();
+        }
+
+        // 2. Hitung Nominal Paket & Uang Muka (DP)
+        $pkg = \App\Services\BookingService::findPackage($validated['package_name']);
+        $packagePrice = $pkg ? ($pkg['raw_price'] ?? 5000000) : 5000000;
+        $calc = \App\Services\BookingService::calculateDp($packagePrice);
+
+        // 3. Generate Kode Booking & Simpan ke Database
+        $bookingCode = \App\Services\BookingService::generateBookingCode();
+
+        $reservation = \App\Models\Reservation::create([
+            'booking_code' => $bookingCode,
+            'name' => $validated['name'],
+            'phone' => $validated['phone'],
+            'email' => $validated['email'] ?? null,
+            'event_date' => $validated['event_date'],
+            'package_name' => $validated['package_name'],
+            'package_price' => $calc['package_price'],
+            'dp_percentage' => $calc['dp_percentage'],
+            'dp_amount' => $calc['dp_amount'],
+            'remaining_amount' => $calc['remaining_amount'],
+            'guest_count' => $validated['guest_count'] ?? null,
+            'notes' => $validated['notes'] ?? null,
+            'status' => 'pending_payment',
+            'payment_status' => 'unpaid',
+        ]);
+
+        // 4. Otomasi Pengiriman WhatsApp (Trigger 1: Pemesan & Trigger 3: Admin)
+        \App\Services\WhatsAppService::sendPendingBookingNotice($reservation);
+        \App\Services\WhatsAppService::sendAdminNewBookingAlert($reservation);
+
+        $instructionUrl = route('booking.instruction', ['booking_code' => $reservation->booking_code]);
 
         if ($request->wantsJson() || $request->ajax()) {
             return response()->json([
                 'success' => true,
-                'message' => 'Reservasi Anda telah tercatat dalam sistem admin.',
-                'whatsapp_url' => $reservation->whats_app_url,
+                'message' => 'Pengajuan reservasi berhasil dicatat. Silakan lakukan pembayaran Uang Muka (DP).',
+                'booking_code' => $reservation->booking_code,
+                'instruction_url' => $instructionUrl,
+                'whatsapp_url' => $reservation->customer_confirm_whats_app_url,
             ]);
         }
 
-        return redirect()->away($reservation->whats_app_url);
+        return redirect()->route('booking.instruction', ['booking_code' => $reservation->booking_code])
+            ->with('success', 'Reservasi Anda telah tercatat. Silakan lakukan transfer Uang Muka (DP) ke rekening resmi kami untuk mengunci tanggal acara.');
+    }
+
+    /**
+     * Halaman Rincian Booking & Instruksi Transfer Rekening Resmi
+     */
+    public function bookingInstruction($booking_code)
+    {
+        $reservation = \App\Models\Reservation::where('booking_code', $booking_code)->firstOrFail();
+
+        $banks = [
+            [
+                'name' => \App\Models\Setting::get('bank_name_1', 'BCA'),
+                'number' => \App\Models\Setting::get('bank_account_number_1', '8465-123-456'),
+                'holder' => \App\Models\Setting::get('bank_account_holder_1', 'Rumah Joglo Omah Ayem'),
+                'logo' => 'BCA',
+                'color' => 'from-blue-600 to-blue-800'
+            ],
+            [
+                'name' => \App\Models\Setting::get('bank_name_2', 'Bank Mandiri'),
+                'number' => \App\Models\Setting::get('bank_account_number_2', '137-00-1234567-8'),
+                'holder' => \App\Models\Setting::get('bank_account_holder_2', 'Rumah Joglo Omah Ayem'),
+                'logo' => 'MANDIRI',
+                'color' => 'from-amber-600 to-amber-800'
+            ]
+        ];
+
+        $instructions = \App\Models\Setting::get('payment_instructions', 'Silakan lakukan transfer Uang Muka (DP) ke rekening resmi kami di atas dan sertakan Kode Booking pada berita transfer.');
+
+        return view('pages.booking-instruction', compact('reservation', 'banks', 'instructions'));
+    }
+
+    /**
+     * Upload Bukti Transfer oleh Pemesan
+     */
+    public function uploadPaymentProof(Request $request, $booking_code)
+    {
+        $reservation = \App\Models\Reservation::where('booking_code', $booking_code)->firstOrFail();
+
+        $request->validate([
+            'payment_proof' => ['required', 'image', 'mimes:jpeg,png,jpg,webp', 'max:5120'],
+            'payment_method' => ['nullable', 'string', 'max:100'],
+        ], [
+            'payment_proof.required' => 'Berkas bukti transfer wajib dipilih.',
+            'payment_proof.image' => 'Berkas harus berupa gambar.',
+            'payment_proof.max' => 'Ukuran berkas maksimal 5MB.',
+        ]);
+
+        $path = $request->file('payment_proof')->store('proofs', 'public');
+
+        $reservation->update([
+            'payment_proof' => $path,
+            'payment_method' => $request->input('payment_method', 'Transfer Bank'),
+        ]);
+
+        return redirect()->back()
+            ->with('success', 'Bukti transfer berhasil diunggah! Pengelola kami akan memverifikasi mutasi dan mengonfirmasi jadwal acara Anda.');
     }
 }
 

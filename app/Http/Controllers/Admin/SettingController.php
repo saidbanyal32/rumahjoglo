@@ -35,6 +35,17 @@ class SettingController extends Controller
             'social_tiktok' => ['nullable', 'string', 'max:255'],
             'social_facebook' => ['nullable', 'string', 'max:255'],
             'social_youtube' => ['nullable', 'string', 'max:255'],
+            'dp_percentage' => ['nullable', 'integer', 'min:10', 'max:100'],
+            'bank_name_1' => ['nullable', 'string', 'max:50'],
+            'bank_account_number_1' => ['nullable', 'string', 'max:50'],
+            'bank_account_holder_1' => ['nullable', 'string', 'max:100'],
+            'bank_name_2' => ['nullable', 'string', 'max:50'],
+            'bank_account_number_2' => ['nullable', 'string', 'max:50'],
+            'bank_account_holder_2' => ['nullable', 'string', 'max:100'],
+            'payment_instructions' => ['nullable', 'string', 'max:1000'],
+            'whatsapp_provider' => ['nullable', 'string', 'max:50'],
+            'whatsapp_api_token' => ['nullable', 'string', 'max:255'],
+            'whatsapp_api_url' => ['nullable', 'string', 'max:255'],
             'hero_headline' => ['nullable', 'string', 'max:300'],
             'hero_subheadline' => ['nullable', 'string', 'max:500'],
             'hero_image_file' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:5120'],
@@ -51,6 +62,17 @@ class SettingController extends Controller
             'social_tiktok' => 'social',
             'social_facebook' => 'social',
             'social_youtube' => 'social',
+            'dp_percentage' => 'payment',
+            'bank_name_1' => 'payment',
+            'bank_account_number_1' => 'payment',
+            'bank_account_holder_1' => 'payment',
+            'bank_name_2' => 'payment',
+            'bank_account_number_2' => 'payment',
+            'bank_account_holder_2' => 'payment',
+            'payment_instructions' => 'payment',
+            'whatsapp_provider' => 'notification',
+            'whatsapp_api_token' => 'notification',
+            'whatsapp_api_url' => 'notification',
             'hero_headline' => 'hero',
             'hero_subheadline' => 'hero',
         ];
@@ -69,7 +91,6 @@ class SettingController extends Controller
         }
 
         return redirect()->route('admin.settings.index')
-            ->with('success', 'Konfigurasi website berhasil disimpan dan diperbarui.');
+            ->with('success', 'Konfigurasi website dan rekening pembayaran berhasil disimpan.');
     }
 }
-

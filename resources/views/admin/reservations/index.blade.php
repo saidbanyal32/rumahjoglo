@@ -1,13 +1,15 @@
 @extends('admin.layouts.app')
 
 @section('title', 'Manajemen Reservasi')
-@section('page_title', 'Daftar Reservasi & Jadwal Booking')
-@section('page_subtitle', 'Pantau pengajuan tanggal, verifikasi ketersediaan jadwal, dan komunikasikan via WhatsApp')
+@section('page_title', 'Daftar Reservasi & Verifikasi DP')
+@section('page_subtitle', 'Pantau pengajuan tanggal, verifikasi bukti transfer uang muka (DP), dan kirim konfirmasi resmi')
 
 @section('content')
 <div class="space-y-6" x-data="{
     detailModal: false,
     statusModal: false,
+    proofModal: false,
+    activeProofUrl: '',
     selectedReservation: null,
     
     openDetail(item) {
@@ -17,6 +19,10 @@
     openStatus(item) {
         this.selectedReservation = item;
         this.statusModal = true;
+    },
+    openProof(url) {
+        this.activeProofUrl = url;
+        this.proofModal = true;
     }
 }">
 
@@ -35,7 +41,7 @@
 
             <a href="{{ route('admin.reservations.index', ['status' => 'pending', 'search' => $search]) }}" 
                class="px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 {{ $status === 'pending' ? 'bg-amber-600 text-white shadow-sm' : 'bg-amber-50 text-amber-800 hover:bg-amber-100 border border-amber-200' }}">
-                <span>Pending / Menunggu</span>
+                <span>Menunggu DP</span>
                 <span class="px-2 py-0.5 rounded-full text-[10px] {{ $status === 'pending' ? 'bg-amber-800 text-amber-200' : 'bg-amber-200 text-amber-900' }}">
                     {{ $counts['pending'] }}
                 </span>
@@ -43,7 +49,7 @@
 
             <a href="{{ route('admin.reservations.index', ['status' => 'confirmed', 'search' => $search]) }}" 
                class="px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 {{ $status === 'confirmed' ? 'bg-emerald-600 text-white shadow-sm' : 'bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-200' }}">
-                <span>Disetujui (Confirmed)</span>
+                <span>DP Lunas / Terkunci</span>
                 <span class="px-2 py-0.5 rounded-full text-[10px] {{ $status === 'confirmed' ? 'bg-emerald-800 text-emerald-200' : 'bg-emerald-200 text-emerald-900' }}">
                     {{ $counts['confirmed'] }}
                 </span>
@@ -72,7 +78,7 @@
             <input type="text" 
                    name="search" 
                    value="{{ $search }}"
-                   placeholder="Cari nama, WhatsApp, paket..."
+                   placeholder="Cari kode booking, nama, WA..."
                    class="w-full pl-9 pr-4 py-2 rounded-xl bg-stone-50 border border-stone-200 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 text-xs transition">
             <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-stone-400 text-xs"></i>
             @if($search)
@@ -104,24 +110,25 @@
             <table class="w-full text-left border-collapse text-xs">
                 <thead>
                     <tr class="bg-stone-50/80 border-b border-stone-200 text-[11px] uppercase tracking-wider font-bold text-stone-500">
-                        <th class="py-4 px-6">Pemesan</th>
+                        <th class="py-4 px-6">Pemesan & Kode</th>
                         <th class="py-4 px-6">Kontak WhatsApp</th>
                         <th class="py-4 px-6">Tanggal Acara</th>
-                        <th class="py-4 px-6">Paket / Estimasi Tamu</th>
-                        <th class="py-4 px-6">Status</th>
+                        <th class="py-4 px-6">Paket Sewa</th>
+                        <th class="py-4 px-6">Rincian DP & Bukti</th>
+                        <th class="py-4 px-6">Status Acara</th>
                         <th class="py-4 px-6 text-right">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-stone-100 text-stone-700">
                     @foreach($reservations as $res)
                     <tr class="hover:bg-stone-50/50 transition">
-                        <!-- Nama & Email -->
+                        <!-- Nama & Kode Booking -->
                         <td class="py-4 px-6">
                             <span class="font-bold text-stone-900 block text-sm">{{ $res->name }}</span>
-                            <span class="text-[11px] text-stone-600">{{ $res->email ?: 'Email tidak dicantumkan' }}</span>
+                            <span class="font-mono text-[11px] text-amber-700 font-semibold block">#{{ $res->booking_code }}</span>
                             @if($res->notes)
-                            <span class="inline-flex items-center gap-1 text-[10px] text-amber-700 font-semibold mt-1">
-                                <i class="fa-solid fa-note-sticky text-[9px]"></i> Memiliki catatan khusus
+                            <span class="inline-flex items-center gap-1 text-[10px] text-stone-500 mt-0.5">
+                                <i class="fa-solid fa-note-sticky text-[9px]"></i> Ada catatan khusus
                             </span>
                             @endif
                         </td>
@@ -131,7 +138,7 @@
                             <span class="font-mono font-medium text-stone-800 block">{{ $res->phone }}</span>
                             <a href="{{ $res->whats_app_url }}" target="_blank" class="inline-flex items-center gap-1.5 text-[11px] text-emerald-700 font-bold hover:text-emerald-800 mt-0.5">
                                 <i class="fa-brands fa-whatsapp"></i>
-                                <span>Kirim Konfirmasi WA</span>
+                                <span>Hubungi WA</span>
                             </a>
                         </td>
 
@@ -140,7 +147,7 @@
                             <span class="font-semibold text-stone-900 block">
                                 {{ $res->event_date ? $res->event_date->translatedFormat('d F Y') : '-' }}
                             </span>
-                            <span class="text-[10px] text-stone-600">
+                            <span class="text-[10px] text-stone-500">
                                 {{ $res->event_date ? $res->event_date->diffForHumans() : '' }}
                             </span>
                         </td>
@@ -148,18 +155,37 @@
                         <!-- Pilihan Paket -->
                         <td class="py-4 px-6">
                             <span class="font-medium text-stone-900 block">{{ $res->package_name }}</span>
-                            <span class="text-[11px] text-stone-600">{{ $res->guest_count ?: 'Tamu tidak diisi' }}</span>
+                            <span class="text-[10px] text-stone-500">{{ $res->guest_count ?: '-' }}</span>
+                        </td>
+
+                        <!-- Rincian DP & Bukti Pembayaran -->
+                        <td class="py-4 px-6">
+                            <span class="font-serif font-bold text-stone-900 block">{{ $res->formatted_dp_amount }}</span>
+                            <div class="flex items-center gap-1.5 mt-1">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold border {{ $res->payment_status_badge }}">
+                                    {{ $res->payment_status_label }}
+                                </span>
+                                @if($res->payment_proof)
+                                <button type="button" 
+                                        @click="openProof('{{ $res->payment_proof_url }}')" 
+                                        class="text-[11px] font-bold text-emerald-700 hover:text-emerald-800 inline-flex items-center gap-1 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200"
+                                        title="Lihat Bukti Transfer">
+                                    <i class="fa-solid fa-receipt"></i>
+                                    <span>Bukti</span>
+                                </button>
+                                @endif
+                            </div>
                         </td>
 
                         <!-- Status Badge & Quick Change -->
                         <td class="py-4 px-6">
-                            <div class="flex items-center gap-2">
+                            <div class="flex items-center gap-1.5">
                                 <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold border {{ $res->status_badge }}">
                                     {{ $res->status_label }}
                                 </span>
                                 <button type="button" 
                                         @click="openStatus({{ json_encode($res) }})" 
-                                        title="Ubah Status" 
+                                        title="Ubah Status Manual" 
                                         class="p-1 text-stone-400 hover:text-amber-600 transition">
                                     <i class="fa-solid fa-pen-to-square"></i>
                                 </button>
@@ -169,28 +195,36 @@
                         <!-- Action Buttons -->
                         <td class="py-4 px-6 text-right">
                             <div class="inline-flex items-center gap-1.5 justify-end">
+                                <!-- Tombol Verifikasi DP Cepat -->
+                                @if($res->status !== 'confirmed' && $res->status !== 'completed')
+                                <form action="{{ route('admin.reservations.confirm-payment', $res->id) }}" 
+                                      method="POST" 
+                                      onsubmit="return confirm('Konfirmasi pembayaran DP untuk {{ $res->name }}? Status akan diubah menjadi Terkonfirmasi dan notifikasi WA resmi akan otomatis terkirim.');"
+                                      class="inline">
+                                    @csrf
+                                    @method('PATCH')
+                                    <button type="submit" 
+                                            class="px-2.5 py-1.5 rounded-xl bg-emerald-600 text-white hover:bg-emerald-500 font-bold text-xs transition flex items-center gap-1 shadow-sm" 
+                                            title="Verifikasi Pembayaran DP & Kunci Tanggal">
+                                        <i class="fa-solid fa-check"></i>
+                                        <span>Konfirmasi DP</span>
+                                    </button>
+                                </form>
+                                @endif
+
                                 <!-- View Detail Modal Trigger -->
                                 <button type="button" 
                                         @click="openDetail({{ json_encode($res) }})"
                                         title="Lihat Detail Lengkap" 
-                                        class="px-2.5 py-1.5 rounded-xl bg-stone-100 text-stone-700 hover:bg-stone-200 transition font-medium text-xs flex items-center gap-1.5">
+                                        class="px-2.5 py-1.5 rounded-xl bg-stone-100 text-stone-700 hover:bg-stone-200 transition font-medium text-xs flex items-center gap-1">
                                     <i class="fa-regular fa-eye"></i>
                                     <span>Detail</span>
                                 </button>
 
-                                <!-- Direct WhatsApp Link -->
-                                <a href="{{ $res->whats_app_url }}" 
-                                   target="_blank" 
-                                   title="Buka Chat WhatsApp Resmi" 
-                                   class="px-2.5 py-1.5 rounded-xl bg-emerald-600 text-white hover:bg-emerald-500 transition font-medium text-xs flex items-center gap-1.5 shadow-sm">
-                                    <i class="fa-brands fa-whatsapp text-sm"></i>
-                                    <span>Chat WA</span>
-                                </a>
-
                                 <!-- Delete Form -->
                                 <form action="{{ route('admin.reservations.destroy', $res->id) }}" 
                                       method="POST" 
-                                      onsubmit="return confirm('Apakah Anda yakin ingin menghapus data reservasi dari {{ $res->name }}?');"
+                                      onsubmit="return confirm('Hapus data reservasi {{ $res->name }}?');"
                                       class="inline">
                                     @csrf
                                     @method('DELETE')
@@ -217,12 +251,7 @@
     <div x-show="detailModal" 
          x-cloak 
          class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
-         x-transition:enter="transition ease-out duration-200"
-         x-transition:enter-start="opacity-0"
-         x-transition:enter-end="opacity-100"
-         x-transition:leave="transition ease-in duration-150"
-         x-transition:leave-start="opacity-100"
-         x-transition:leave-end="opacity-0">
+         x-transition>
         
         <div @click.away="detailModal = false" 
              class="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-8 shadow-2xl border border-stone-200 relative max-h-[90vh] overflow-y-auto">
@@ -233,8 +262,8 @@
                         <i class="fa-solid fa-address-card"></i>
                     </div>
                     <div>
-                        <h3 class="font-serif text-lg font-bold text-stone-900">Detail Reservasi Venue</h3>
-                        <p class="text-xs text-stone-600">ID Registrasi: #<span x-text="selectedReservation ? selectedReservation.id : ''"></span></p>
+                        <h3 class="font-serif text-lg font-bold text-stone-900">Detail Reservasi & Pembayaran</h3>
+                        <p class="text-xs text-amber-800 font-mono font-bold">Kode: #<span x-text="selectedReservation ? selectedReservation.booking_code : ''"></span></p>
                     </div>
                 </div>
                 <button @click="detailModal = false" class="p-2 text-stone-400 hover:text-stone-700 transition">
@@ -243,46 +272,55 @@
             </div>
 
             <div class="py-5 space-y-4 text-xs" x-if="selectedReservation">
+                <!-- Rincian Pemesan -->
                 <div class="grid grid-cols-2 gap-4 bg-stone-50 p-4 rounded-2xl border border-stone-200/60">
                     <div>
-                        <span class="text-stone-600 uppercase tracking-wider font-semibold block text-[10px]">Nama Pemesan</span>
+                        <span class="text-stone-500 uppercase tracking-wider font-semibold block text-[10px]">Nama Pemesan</span>
                         <span class="text-stone-900 font-bold text-sm block mt-0.5" x-text="selectedReservation.name"></span>
                     </div>
                     <div>
-                        <span class="text-stone-600 uppercase tracking-wider font-semibold block text-[10px]">Kontak WhatsApp</span>
+                        <span class="text-stone-500 uppercase tracking-wider font-semibold block text-[10px]">Kontak WhatsApp</span>
                         <span class="text-stone-900 font-mono font-bold block mt-0.5" x-text="selectedReservation.phone"></span>
                     </div>
                     <div>
-                        <span class="text-stone-600 uppercase tracking-wider font-semibold block text-[10px]">Email Pemesan</span>
+                        <span class="text-stone-500 uppercase tracking-wider font-semibold block text-[10px]">Email</span>
                         <span class="text-stone-900 font-medium block mt-0.5" x-text="selectedReservation.email || '-'"></span>
                     </div>
                     <div>
-                        <span class="text-stone-600 uppercase tracking-wider font-semibold block text-[10px]">Tanggal Rencana</span>
+                        <span class="text-stone-500 uppercase tracking-wider font-semibold block text-[10px]">Tanggal Acara</span>
                         <span class="text-amber-800 font-bold block mt-0.5" x-text="selectedReservation.event_date ? selectedReservation.event_date.substring(0, 10) : '-'"></span>
                     </div>
                 </div>
 
-                <div class="bg-stone-50 p-4 rounded-2xl border border-stone-200/60 space-y-2">
-                    <div>
-                        <span class="text-stone-600 uppercase tracking-wider font-semibold block text-[10px]">Pilihan Paket Sewa</span>
-                        <span class="text-stone-900 font-bold text-sm block" x-text="selectedReservation.package_name"></span>
-                    </div>
-                    <div>
-                        <span class="text-stone-600 uppercase tracking-wider font-semibold block text-[10px]">Estimasi Jumlah Tamu</span>
-                        <span class="text-stone-800 font-medium block" x-text="selectedReservation.guest_count || '-'"></span>
+                <!-- Rincian Finansial / DP -->
+                <div class="bg-amber-50/70 p-4 rounded-2xl border border-amber-200 space-y-2">
+                    <span class="text-amber-900 font-bold uppercase tracking-wider block text-[10px]">Rincian Finansial & DP</span>
+                    <div class="grid grid-cols-3 gap-2 text-center pt-1">
+                        <div class="bg-white p-2.5 rounded-xl border border-amber-200">
+                            <span class="text-[10px] text-stone-500 block">Total Paket</span>
+                            <span class="font-bold text-stone-900 block mt-0.5" x-text="'Rp ' + Number(selectedReservation.package_price || 0).toLocaleString('id-ID')"></span>
+                        </div>
+                        <div class="bg-white p-2.5 rounded-xl border-2 border-emerald-500">
+                            <span class="text-[10px] text-emerald-800 font-bold block">Nominal DP</span>
+                            <span class="font-bold text-emerald-700 block mt-0.5" x-text="'Rp ' + Number(selectedReservation.dp_amount || 0).toLocaleString('id-ID')"></span>
+                        </div>
+                        <div class="bg-white p-2.5 rounded-xl border border-amber-200">
+                            <span class="text-[10px] text-stone-500 block">Sisa Pelunasan</span>
+                            <span class="font-bold text-stone-900 block mt-0.5" x-text="'Rp ' + Number(selectedReservation.remaining_amount || 0).toLocaleString('id-ID')"></span>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Catatan Khusus -->
-                <div>
-                    <span class="text-stone-600 uppercase tracking-wider font-semibold block text-[10px] mb-1">Catatan Khusus dari Pemesan</span>
-                    <div class="p-3 bg-amber-50/70 border border-amber-200/80 rounded-xl text-stone-800 italic" x-text="selectedReservation.notes || 'Tidak ada catatan khusus dari pemesan.'"></div>
-                </div>
-
-                <!-- Catatan Internal Admin -->
-                <div>
-                    <span class="text-stone-600 uppercase tracking-wider font-semibold block text-[10px] mb-1">Catatan Internal Pengelola / Admin</span>
-                    <div class="p-3 bg-stone-100 border border-stone-200 rounded-xl text-stone-800" x-text="selectedReservation.admin_notes || 'Belum ada catatan internal.'"></div>
+                <!-- Catatan Pemesan & Admin -->
+                <div class="space-y-3">
+                    <div>
+                        <span class="text-stone-500 uppercase tracking-wider font-semibold block text-[10px] mb-1">Catatan Khusus Pemesan</span>
+                        <div class="p-3 bg-stone-100 rounded-xl text-stone-800 italic" x-text="selectedReservation.notes || 'Tidak ada catatan khusus.'"></div>
+                    </div>
+                    <div>
+                        <span class="text-stone-500 uppercase tracking-wider font-semibold block text-[10px] mb-1">Catatan Internal Pengelola / Admin</span>
+                        <div class="p-3 bg-stone-100 rounded-xl text-stone-800" x-text="selectedReservation.admin_notes || 'Belum ada catatan internal.'"></div>
+                    </div>
                 </div>
             </div>
 
@@ -307,12 +345,7 @@
     <div x-show="statusModal" 
          x-cloak 
          class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
-         x-transition:enter="transition ease-out duration-200"
-         x-transition:enter-start="opacity-0"
-         x-transition:enter-end="opacity-100"
-         x-transition:leave="transition ease-in duration-150"
-         x-transition:leave-start="opacity-100"
-         x-transition:leave-end="opacity-0">
+         x-transition>
         
         <div @click.away="statusModal = false" 
              class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-stone-200 relative">
@@ -332,26 +365,27 @@
 
                 <div>
                     <label class="block font-semibold uppercase tracking-wider text-stone-600 mb-1.5">
-                        Status Saat Ini & Pembaruan
+                        Status Acara
                     </label>
                     <select name="status" 
-                            x-model="selectedReservation ? selectedReservation.status : 'pending'"
+                            x-model="selectedReservation ? selectedReservation.status : 'pending_payment'"
                             class="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 text-xs font-semibold bg-white">
-                        <option value="pending">Menunggu Konfirmasi (Pending)</option>
-                        <option value="confirmed">Disetujui / Terkonfirmasi (Confirmed)</option>
+                        <option value="pending_payment">Menunggu Pembayaran DP (Pending Payment)</option>
+                        <option value="confirmed">Disetujui / Terkonfirmasi (DP Diterima)</option>
                         <option value="completed">Selesai Dilaksanakan (Completed)</option>
                         <option value="cancelled">Dibatalkan (Cancelled)</option>
                     </select>
+                    <p class="text-[10px] text-stone-500 mt-1">Mengubah ke 'Disetujui / Terkonfirmasi' akan otomatis mengunci tanggal dan mengirim konfirmasi resmi WA ke pemesan.</p>
                 </div>
 
                 <div>
                     <label class="block font-semibold uppercase tracking-wider text-stone-600 mb-1.5">
-                        Catatan Internal Pengelola (Opsional)
+                        Catatan Internal Pengelola
                     </label>
                     <textarea name="admin_notes" 
                               rows="3" 
                               x-model="selectedReservation ? selectedReservation.admin_notes : ''"
-                              placeholder="Misal: Sudah bayar DP 30%, janji survei hari Sabtu jam 14.00, dsb."
+                              placeholder="Misal: DP 30% via BCA terverifikasi, janji survei hari Sabtu, dsb."
                               class="w-full px-3.5 py-2 rounded-xl border border-stone-300 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 text-xs"></textarea>
                 </div>
 
@@ -370,6 +404,29 @@
         </div>
     </div>
 
+    <!-- 5. MODAL LIGHTBOX BUKTI TRANSFER -->
+    <div x-show="proofModal" 
+         x-cloak 
+         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md"
+         x-transition>
+        <div @click.away="proofModal = false" class="max-w-2xl w-full bg-stone-900 rounded-3xl overflow-hidden shadow-2xl border border-stone-800 relative">
+            <div class="p-4 border-b border-stone-800 flex items-center justify-between text-white">
+                <h4 class="font-serif font-bold text-sm">Bukti Transfer Pembayaran</h4>
+                <button @click="proofModal = false" class="p-1.5 text-stone-400 hover:text-white">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="p-4 flex items-center justify-center max-h-[75vh] overflow-hidden bg-stone-950">
+                <img :src="activeProofUrl" alt="Bukti Transfer" class="max-h-[70vh] object-contain rounded-xl">
+            </div>
+            <div class="p-4 border-t border-stone-800 flex justify-end">
+                <a :href="activeProofUrl" target="_blank" download class="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold transition flex items-center gap-2">
+                    <i class="fa-solid fa-download"></i>
+                    <span>Buka File Asli</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
 </div>
 @endsection
-
