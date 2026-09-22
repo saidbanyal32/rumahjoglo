@@ -25,87 +25,7 @@
 </section>
 
 <!-- Formulir Reservasi Interaktif -->
-<section class="py-16 bg-brand-cream" 
-         x-data="{
-             name: '{{ old('name') }}',
-             phone: '{{ old('phone') }}',
-             email: '{{ old('email') }}',
-             eventDate: '{{ old('event_date') }}',
-             selectedPkg: '{{ old('package_name', $selectedPackage) }}',
-             guestCount: '{{ old('guest_count', '150 - 300 Tamu (Resepsi Sedang)') }}',
-             notes: '{{ old('notes') }}',
-             
-             packages: @json($packages),
-             dpPercentage: {{ $dpPercentage ?? 30 }},
-             
-             dateStatus: null, // null, 'checking', 'available', 'pending', 'booked'
-             dateMessage: '',
-             isSubmitting: false,
-
-             formatRupiah(number) {
-                 return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(number);
-             },
-
-             getSelectedPackageData() {
-                 if (!this.selectedPkg) return null;
-                 return this.packages.find(p => p.name === this.selectedPkg || p.id === this.selectedPkg || p.slug === this.selectedPkg) || null;
-             },
-
-             getPackagePrice() {
-                 let pkg = this.getSelectedPackageData();
-                 return pkg && pkg.raw_price ? pkg.raw_price : 5000000;
-             },
-
-             getDpAmount() {
-                 return Math.round((this.getPackagePrice() * this.dpPercentage) / 100);
-             },
-
-             getRemainingAmount() {
-                 return Math.max(0, this.getPackagePrice() - this.getDpAmount());
-             },
-
-             async checkDateAvailability() {
-                 if (!this.eventDate) {
-                     this.dateStatus = null;
-                     this.dateMessage = '';
-                     return;
-                 }
-
-                 this.dateStatus = 'checking';
-                 this.dateMessage = 'Memeriksa ketersediaan kalender venue...';
-
-                 try {
-                     let res = await fetch(`{{ route('api.check-date') }}?date=${this.eventDate}`);
-                     let data = await res.json();
-                     
-                     if (data.available === false) {
-                         this.dateStatus = 'booked';
-                         this.dateMessage = data.message;
-                     } else if (data.has_pending) {
-                         this.dateStatus = 'pending';
-                         this.dateMessage = data.message;
-                     } else {
-                         this.dateStatus = 'available';
-                         this.dateMessage = data.message;
-                     }
-                 } catch (e) {
-                     this.dateStatus = null;
-                     this.dateMessage = '';
-                 }
-             },
-
-             consultViaWhatsApp() {
-                 let text = `*KONSULTASI JADWAL & RESERVASI - OMAH AYEM*%0A%0A` +
-                            `*Nama:* ${this.name || '-' }%0A` +
-                            `*WhatsApp:* ${this.phone || '-' }%0A` +
-                            `*Rencana Tanggal:* ${this.eventDate || '-' }%0A` +
-                            `*Paket:* ${this.selectedPkg || '-' }%0A` +
-                            `*Tamu:* ${this.guestCount || '-' }%0A` +
-                            `*Catatan:* ${this.notes || '-' }%0A%0A` +
-                            `Halo Admin Omah Ayem, saya ingin konsultasi ketersediaan jadwal dan survei lokasi terlebih dahulu. Terima kasih.`;
-                 window.open(`https://wa.me/{{ $siteSettings['formatted_whatsapp'] ?? '6281234567890' }}?text=${text}`, '_blank');
-             }
-         }">
+<section class="py-16 bg-brand-cream" x-data="bookingForm()">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <!-- Flash Alert Error -->
@@ -358,3 +278,94 @@
     </div>
 </section>
 @endsection
+
+@push('scripts')
+<script>
+    function bookingForm() {
+        return {
+            name: @json(old('name', '')),
+            phone: @json(old('phone', '')),
+            email: @json(old('email', '')),
+            eventDate: @json(old('event_date', '')),
+            selectedPkg: @json(old('package_name', $selectedPackage ?? '')),
+            guestCount: @json(old('guest_count', '150 - 300 Tamu (Resepsi Sedang)')),
+            notes: @json(old('notes', '')),
+            
+            packages: @json($packages),
+            dpPercentage: {{ (int) ($dpPercentage ?? 30) }},
+            
+            dateStatus: null, // null, 'checking', 'available', 'pending', 'booked'
+            dateMessage: '',
+            isSubmitting: false,
+
+            formatRupiah(number) {
+                return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(number);
+            },
+
+            getSelectedPackageData() {
+                if (!this.selectedPkg) return null;
+                return this.packages.find(p => p.name === this.selectedPkg || p.id === this.selectedPkg || p.slug === this.selectedPkg) || null;
+            },
+
+            getPackagePrice() {
+                let pkg = this.getSelectedPackageData();
+                return pkg && pkg.raw_price ? pkg.raw_price : 5000000;
+            },
+
+            getDpAmount() {
+                return Math.round((this.getPackagePrice() * this.dpPercentage) / 100);
+            },
+
+            getRemainingAmount() {
+                return Math.max(0, this.getPackagePrice() - this.getDpAmount());
+            },
+
+            async checkDateAvailability() {
+                if (!this.eventDate) {
+                    this.dateStatus = null;
+                    this.dateMessage = '';
+                    return;
+                }
+
+                this.dateStatus = 'checking';
+                this.dateMessage = 'Memeriksa ketersediaan kalender venue...';
+
+                try {
+                    let res = await fetch(`{{ route('api.check-date') }}?date=${this.eventDate}`);
+                    let data = await res.json();
+                    
+                    if (data.available === false) {
+                        this.dateStatus = 'booked';
+                        this.dateMessage = data.message;
+                    } else if (data.has_pending) {
+                        this.dateStatus = 'pending';
+                        this.dateMessage = data.message;
+                    } else {
+                        this.dateStatus = 'available';
+                        this.dateMessage = data.message;
+                    }
+                } catch (e) {
+                    this.dateStatus = null;
+                    this.dateMessage = '';
+                }
+            },
+
+            consultViaWhatsApp() {
+                let text = `*KONSULTASI JADWAL & RESERVASI - OMAH AYEM*%0A%0A` +
+                           `*Nama:* ${this.name || '-' }%0A` +
+                           `*WhatsApp:* ${this.phone || '-' }%0A` +
+                           `*Rencana Tanggal:* ${this.eventDate || '-' }%0A` +
+                           `*Paket:* ${this.selectedPkg || '-' }%0A` +
+                           `*Tamu:* ${this.guestCount || '-' }%0A` +
+                           `*Catatan:* ${this.notes || '-' }%0A%0A` +
+                           `Halo Admin Omah Ayem, saya ingin konsultasi ketersediaan jadwal dan survei lokasi terlebih dahulu. Terima kasih.`;
+                window.open(`https://wa.me/{{ $siteSettings['formatted_whatsapp'] ?? '6281234567890' }}?text=${text}`, '_blank');
+            }
+        };
+    }
+
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('bookingForm', bookingForm);
+    });
+</script>
+@endpush
